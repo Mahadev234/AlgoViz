@@ -171,7 +171,7 @@ const GraphVisualizer: React.FC = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="flex flex-col space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="block text-sm font-medium text-gray-300">
             Vertices
           </label>
           <input
@@ -181,12 +181,12 @@ const GraphVisualizer: React.FC = () => {
             value={vertices}
             onChange={(e) => setVertices(Number(e.target.value))}
             disabled={isRunning}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300"
+            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-200"
           />
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="block text-sm font-medium text-gray-300">
             Start Node
           </label>
           <input
@@ -196,13 +196,13 @@ const GraphVisualizer: React.FC = () => {
             value={startNode}
             onChange={(e) => setStartNode(Number(e.target.value))}
             disabled={isRunning}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300"
+            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-200"
           />
         </div>
 
         {(algorithm === 'dijkstra' || algorithm === 'astar') && (
           <div className="flex flex-col space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-300">
               End Node
             </label>
             <input
@@ -212,20 +212,20 @@ const GraphVisualizer: React.FC = () => {
               value={endNode}
               onChange={(e) => setEndNode(Number(e.target.value))}
               disabled={isRunning}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-200"
             />
           </div>
         )}
 
         <div className="flex flex-col space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="block text-sm font-medium text-gray-300">
             Algorithm
           </label>
           <select
             value={algorithm}
             onChange={(e) => setAlgorithm(e.target.value as GraphAlgorithm)}
             disabled={isRunning}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300"
+            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-200"
           >
             <option value="bfs">Breadth-First Search</option>
             <option value="dfs">Depth-First Search</option>
@@ -237,25 +237,21 @@ const GraphVisualizer: React.FC = () => {
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="block text-sm font-medium text-gray-300">
             Animation Speed
           </label>
-          <div className="flex items-center space-x-4">
-            <input
-              type="range"
-              min="1"
-              max="100"
-              value={speed}
-              onChange={(e) => setSpeed(Number(e.target.value))}
-              className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
-              disabled={isRunning}
-            />
-            <span className="text-gray-700 dark:text-gray-300 w-8 text-center">{speed}</span>
-          </div>
+          <input
+            type="range"
+            min="1"
+            max="100"
+            value={speed}
+            onChange={(e) => setSpeed(Number(e.target.value))}
+            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500"
+          />
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="block text-sm font-medium text-gray-300">
             Max Edge Weight
           </label>
           <input
@@ -265,12 +261,12 @@ const GraphVisualizer: React.FC = () => {
             value={maxWeight}
             onChange={(e) => setMaxWeight(Number(e.target.value))}
             disabled={isRunning}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300"
+            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-200"
           />
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="block text-sm font-medium text-gray-300">
             Step Mode
           </label>
           <div className="flex items-center">
@@ -286,50 +282,40 @@ const GraphVisualizer: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={startAlgorithm}
-          disabled={isRunning}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-        >
-          Start
-        </button>
-
-        <button
-          onClick={pauseAlgorithm}
-          disabled={!isRunning || isPaused}
-          className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-        >
-          Pause
-        </button>
-
-        <button
-          onClick={resumeAlgorithm}
-          disabled={!isRunning || !isPaused}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-        >
-          Resume
-        </button>
-
-        <button
-          onClick={stopAlgorithm}
-          disabled={!isRunning}
-          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-        >
-          Stop
-        </button>
-
+      <div className="flex justify-center space-x-4">
         <button
           onClick={generateRandomGraphLayout}
           disabled={isRunning}
-          className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          className="px-4 py-2 bg-gray-700 text-gray-200 rounded-lg hover:bg-gray-600 transition-colors duration-200 disabled:opacity-50"
         >
-          Generate New Graph
+          Generate Random Graph
         </button>
-
+        <button
+          onClick={startAlgorithm}
+          disabled={isRunning}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 disabled:opacity-50"
+        >
+          Start Algorithm
+        </button>
+        {isRunning && (
+          <>
+            <button
+              onClick={isPaused ? resumeAlgorithm : pauseAlgorithm}
+              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200"
+            >
+              {isPaused ? 'Resume' : 'Pause'}
+            </button>
+            <button
+              onClick={stopAlgorithm}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
+            >
+              Stop
+            </button>
+          </>
+        )}
         <button
           onClick={() => setShowLegend(!showLegend)}
-          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors duration-200"
+          className="px-4 py-2 bg-gray-700 text-gray-200 rounded-lg hover:bg-gray-600 transition-colors duration-200"
         >
           {showLegend ? 'Hide Legend' : 'Show Legend'}
         </button>
@@ -342,99 +328,88 @@ const GraphVisualizer: React.FC = () => {
       )}
 
       {showLegend && (
-        <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-          <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">Legend</h3>
+        <div className="bg-gray-800 rounded-xl p-4">
+          <h4 className="text-lg font-medium text-gray-300 mb-3">Legend</h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 rounded-full bg-purple-600"></div>
-              <span className="text-sm text-gray-700 dark:text-gray-300">Start/End Node</span>
+              <div className="w-4 h-4 rounded-full bg-green-500"></div>
+              <span className="text-gray-300">Start Node</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 rounded-full bg-blue-600"></div>
-              <span className="text-sm text-gray-700 dark:text-gray-300">Visited Node</span>
+              <div className="w-4 h-4 rounded-full bg-red-500"></div>
+              <span className="text-gray-300">End Node</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 rounded-full bg-green-600"></div>
-              <span className="text-sm text-gray-700 dark:text-gray-300">Path Node</span>
+              <div className="w-4 h-4 rounded-full bg-blue-500"></div>
+              <span className="text-gray-300">Visited</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 rounded-full bg-red-600"></div>
-              <span className="text-sm text-gray-700 dark:text-gray-300">Current Node</span>
+              <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+              <span className="text-gray-300">Current</span>
             </div>
           </div>
         </div>
       )}
 
-      <div className="relative h-[600px] w-full bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+      <div className="relative h-[600px] bg-gray-800 rounded-xl overflow-hidden">
         <svg className="w-full h-full">
-          {edges.map((edge, index) => {
-            const fromNode = nodes[edge.from];
-            const toNode = nodes[edge.to];
-            const isHighlighted = currentPath.includes(edge.from) && currentPath.includes(edge.to) &&
-              Math.abs(currentPath.indexOf(edge.from) - currentPath.indexOf(edge.to)) === 1;
-
-            return (
-              <g key={index}>
-                <line
-                  x1={fromNode.x}
-                  y1={fromNode.y}
-                  x2={toNode.x}
-                  y2={toNode.y}
-                  stroke={isHighlighted ? '#EF4444' : '#3B82F6'}
-                  strokeWidth={isHighlighted ? 3 : 2}
-                  className="transition-colors duration-300"
-                />
-                <text
-                  x={(fromNode.x + toNode.x) / 2}
-                  y={(fromNode.y + toNode.y) / 2}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  className="text-sm font-medium fill-gray-700 dark:fill-gray-300"
-                >
-                  {edge.weight}
-                </text>
-              </g>
-            );
-          })}
-
-          {nodes.map((node) => {
-            const isVisited = visitedNodes.includes(node.id);
-            const isCurrent = currentNode.includes(node.id);
-            const isInPath = currentPath.includes(node.id);
-            const isStart = node.id === startNode;
-            const isEnd = node.id === endNode;
-
-            return (
-              <g key={node.id}>
-                <circle
-                  cx={node.x}
-                  cy={node.y}
-                  r={20}
-                  fill={
-                    isCurrent
-                      ? '#EF4444'
-                      : isInPath
-                      ? '#10B981'
-                      : isVisited
-                      ? '#3B82F6'
-                      : isStart || isEnd
-                      ? '#8B5CF6'
-                      : '#6B7280'
-                  }
-                  className="transition-colors duration-300"
-                />
-                <text
-                  x={node.x}
-                  y={node.y}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  className="text-sm font-medium fill-white"
-                >
-                  {node.id}
-                </text>
-              </g>
-            );
-          })}
+          {edges.map((edge, index) => (
+            <g key={index}>
+              <line
+                x1={nodes[edge.from].x}
+                y1={nodes[edge.from].y}
+                x2={nodes[edge.to].x}
+                y2={nodes[edge.to].y}
+                className={`stroke-current ${
+                  currentPath.includes(edge.from) && currentPath.includes(edge.to)
+                    ? 'text-green-500'
+                    : visitedNodes.includes(edge.from) && visitedNodes.includes(edge.to)
+                    ? 'text-blue-500'
+                    : 'text-gray-600'
+                }`}
+                strokeWidth="2"
+              />
+              <text
+                x={(nodes[edge.from].x + nodes[edge.to].x) / 2}
+                y={(nodes[edge.from].y + nodes[edge.to].y) / 2}
+                className="text-xs fill-gray-400"
+                textAnchor="middle"
+              >
+                {edge.weight}
+              </text>
+            </g>
+          ))}
+          {nodes.map((node) => (
+            <g key={node.id}>
+              <circle
+                cx={node.x}
+                cy={node.y}
+                r="20"
+                className={`fill-current ${
+                  node.id === startNode
+                    ? 'text-green-500'
+                    : node.id === endNode
+                    ? 'text-red-500'
+                    : currentPath.includes(node.id)
+                    ? 'text-green-500'
+                    : visitedNodes.includes(node.id)
+                    ? 'text-blue-500'
+                    : currentNode.includes(node.id)
+                    ? 'text-yellow-500'
+                    : 'text-gray-600'
+                }`}
+              />
+              <text
+                x={node.x}
+                y={node.y}
+                className="text-sm fill-white"
+                textAnchor="middle"
+                dominantBaseline="middle"
+              >
+                {node.id}
+              </text>
+            </g>
+          ))}
         </svg>
       </div>
     </div>
