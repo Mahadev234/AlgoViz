@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { GraphAlgorithms } from '../algorithms/graph';
 import { generateRandomGraph } from '../algorithms/utils';
+import PseudocodeDisplay from './PseudocodeDisplay';
+import { graphPseudocode } from '../algorithms/pseudocode';
 
 type GraphAlgorithm = 'bfs' | 'dfs' | 'dijkstra' | 'astar' | 'prim' | 'kruskal';
 
@@ -15,6 +17,75 @@ interface Edge {
   to: number;
   weight: number;
 }
+
+const ALGORITHM_INFO = {
+  bfs: {
+    name: 'Breadth-First Search',
+    description: 'BFS explores all vertices at the present depth level before moving on to vertices at the next depth level. It uses a queue to keep track of vertices to visit next.',
+    timeComplexity: 'O(V + E)',
+    spaceComplexity: 'O(V)',
+    useCases: [
+      'Finding the shortest path in an unweighted graph',
+      'Finding all connected components in a graph',
+      'Testing if a graph is bipartite'
+    ]
+  },
+  dfs: {
+    name: 'Depth-First Search',
+    description: 'DFS explores as far as possible along each branch before backtracking. It uses a stack (either explicitly or through recursion) to keep track of vertices to visit.',
+    timeComplexity: 'O(V + E)',
+    spaceComplexity: 'O(V)',
+    useCases: [
+      'Topological sorting',
+      'Finding strongly connected components',
+      'Detecting cycles in a graph'
+    ]
+  },
+  dijkstra: {
+    name: "Dijkstra's Algorithm",
+    description: "Dijkstra's algorithm finds the shortest path from a source vertex to all other vertices in a weighted graph with non-negative edge weights. It uses a priority queue to always expand the closest vertex.",
+    timeComplexity: 'O((V + E) log V)',
+    spaceComplexity: 'O(V)',
+    useCases: [
+      'Finding shortest paths in road networks',
+      'Network routing protocols',
+      'Finding shortest paths in weighted graphs'
+    ]
+  },
+  astar: {
+    name: 'A* Algorithm',
+    description: 'A* algorithm finds the shortest path from a source vertex to a target vertex using a heuristic function to estimate the cost to reach the goal. It combines the actual cost from the start with the estimated cost to the goal.',
+    timeComplexity: 'O((V + E) log V)',
+    spaceComplexity: 'O(V)',
+    useCases: [
+      'Pathfinding in games',
+      'Robotics path planning',
+      'Finding optimal routes in maps'
+    ]
+  },
+  prim: {
+    name: "Prim's Algorithm",
+    description: "Prim's algorithm finds a minimum spanning tree in a weighted graph. It starts from an arbitrary vertex and grows the tree by always adding the least weight edge that connects a vertex in the tree to a vertex outside the tree.",
+    timeComplexity: 'O((V + E) log V)',
+    spaceComplexity: 'O(V)',
+    useCases: [
+      'Network design',
+      'Cluster analysis',
+      'Approximation algorithms for NP-hard problems'
+    ]
+  },
+  kruskal: {
+    name: "Kruskal's Algorithm",
+    description: "Kruskal's algorithm finds a minimum spanning tree in a weighted graph. It sorts all edges by weight and adds them to the tree if they don't form a cycle, using a disjoint-set data structure to efficiently check for cycles.",
+    timeComplexity: 'O(E log V)',
+    spaceComplexity: 'O(V)',
+    useCases: [
+      'Network design',
+      'Circuit design',
+      'Finding minimum cost spanning trees'
+    ]
+  }
+};
 
 const GraphVisualizer: React.FC = () => {
   const [vertices, setVertices] = useState<number>(10);
@@ -34,6 +105,7 @@ const GraphVisualizer: React.FC = () => {
   const [stepMode, setStepMode] = useState<boolean>(false);
   const [maxWeight, setMaxWeight] = useState<number>(10);
   const [showLegend, setShowLegend] = useState<boolean>(true);
+  const [highlightedLine, setHighlightedLine] = useState<number | undefined>(undefined);
   
   const graphAlgoRef = useRef<GraphAlgorithms | null>(null);
   const animationRef = useRef<number | null>(null);
@@ -71,6 +143,7 @@ const GraphVisualizer: React.FC = () => {
     setCurrentPath([]);
     setCurrentNode([]);
     setError(null);
+    setHighlightedLine(undefined);
 
     try {
       graphAlgoRef.current = new GraphAlgorithms(vertices, edges.map(edge => [edge.from, edge.to, edge.weight]));
@@ -88,6 +161,55 @@ const GraphVisualizer: React.FC = () => {
           setCurrentPath(result.value.path);
           setCurrentNode(result.value.current);
           
+          // Update highlighted line based on the current step
+          const currentStep = result.value;
+          let lineToHighlight: number | undefined;
+          
+          // Map the current step to the corresponding pseudocode line
+          switch (algorithm) {
+            case 'bfs':
+              if (currentStep.current.length > 0) {
+                lineToHighlight = 5; // "current = dequeue from Q"
+              } else if (currentStep.visited.length > 0) {
+                lineToHighlight = 7; // "for each neighbor of current do"
+              }
+              break;
+            case 'dfs':
+              if (currentStep.current.length > 0) {
+                lineToHighlight = 4; // "current = pop from S"
+              } else if (currentStep.visited.length > 0) {
+                lineToHighlight = 7; // "for each neighbor of current do"
+              }
+              break;
+            case 'dijkstra':
+              if (currentStep.current.length > 0) {
+                lineToHighlight = 6; // "u = extract minimum from Q"
+              } else if (currentStep.visited.length > 0) {
+                lineToHighlight = 8; // "if distance[u] + weight(u,v) < distance[v] then"
+              }
+              break;
+            case 'astar':
+              if (currentStep.current.length > 0) {
+                lineToHighlight = 6; // "current = extract minimum from Q"
+              } else if (currentStep.visited.length > 0) {
+                lineToHighlight = 8; // "if tentative_gScore < gScore[neighbor] then"
+              }
+              break;
+            case 'prim':
+              if (currentStep.current.length > 0) {
+                lineToHighlight = 6; // "u = extract minimum from Q"
+              } else if (currentStep.visited.length > 0) {
+                lineToHighlight = 8; // "if v in Q and weight(u,v) < key[v] then"
+              }
+              break;
+            case 'kruskal':
+              if (currentStep.current.length > 0) {
+                lineToHighlight = 6; // "if u and v are in different sets then"
+              }
+              break;
+          }
+          setHighlightedLine(lineToHighlight);
+          
           if (stepMode) {
             setIsPaused(true);
             graphAlgoRef.current?.pause();
@@ -104,6 +226,7 @@ const GraphVisualizer: React.FC = () => {
         } else {
           setIsRunning(false);
           setIsPaused(false);
+          setHighlightedLine(undefined);
         }
       };
 
@@ -168,7 +291,7 @@ const GraphVisualizer: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="flex flex-col space-y-2">
           <label className="block text-sm font-medium text-gray-300">
@@ -351,66 +474,104 @@ const GraphVisualizer: React.FC = () => {
         </div>
       )}
 
-      <div className="relative h-[600px] bg-gray-800 rounded-xl overflow-hidden">
-        <svg className="w-full h-full">
-          {edges.map((edge, index) => (
-            <g key={index}>
-              <line
-                x1={nodes[edge.from].x}
-                y1={nodes[edge.from].y}
-                x2={nodes[edge.to].x}
-                y2={nodes[edge.to].y}
-                className={`stroke-current ${
-                  currentPath.includes(edge.from) && currentPath.includes(edge.to)
-                    ? 'text-green-500'
-                    : visitedNodes.includes(edge.from) && visitedNodes.includes(edge.to)
-                    ? 'text-blue-500'
-                    : 'text-gray-600'
-                }`}
-                strokeWidth="2"
-              />
-              <text
-                x={(nodes[edge.from].x + nodes[edge.to].x) / 2}
-                y={(nodes[edge.from].y + nodes[edge.to].y) / 2}
-                className="text-xs fill-gray-400"
-                textAnchor="middle"
-              >
-                {edge.weight}
-              </text>
-            </g>
-          ))}
-          {nodes.map((node) => (
-            <g key={node.id}>
-              <circle
-                cx={node.x}
-                cy={node.y}
-                r="20"
-                className={`fill-current ${
-                  node.id === startNode
-                    ? 'text-green-500'
-                    : node.id === endNode
-                    ? 'text-red-500'
-                    : currentPath.includes(node.id)
-                    ? 'text-green-500'
-                    : visitedNodes.includes(node.id)
-                    ? 'text-blue-500'
-                    : currentNode.includes(node.id)
-                    ? 'text-yellow-500'
-                    : 'text-gray-600'
-                }`}
-              />
-              <text
-                x={node.x}
-                y={node.y}
-                className="text-sm fill-white"
-                textAnchor="middle"
-                dominantBaseline="middle"
-              >
-                {node.id}
-              </text>
-            </g>
-          ))}
-        </svg>
+      <div className="flex gap-6">
+        <div className="flex-1">
+          <div className="relative h-[600px] bg-gray-800 rounded-xl overflow-hidden">
+            <svg className="w-full h-full">
+              {edges.map((edge, index) => (
+                <g key={index}>
+                  <line
+                    x1={nodes[edge.from].x}
+                    y1={nodes[edge.from].y}
+                    x2={nodes[edge.to].x}
+                    y2={nodes[edge.to].y}
+                    className={`stroke-current ${
+                      currentPath.includes(edge.from) && currentPath.includes(edge.to)
+                        ? 'text-green-500'
+                        : visitedNodes.includes(edge.from) && visitedNodes.includes(edge.to)
+                        ? 'text-blue-500'
+                        : 'text-gray-600'
+                    }`}
+                    strokeWidth="2"
+                  />
+                  <text
+                    x={(nodes[edge.from].x + nodes[edge.to].x) / 2}
+                    y={(nodes[edge.from].y + nodes[edge.to].y) / 2}
+                    className="text-xs fill-gray-400"
+                    textAnchor="middle"
+                  >
+                    {edge.weight}
+                  </text>
+                </g>
+              ))}
+              {nodes.map((node) => (
+                <g key={node.id}>
+                  <circle
+                    cx={node.x}
+                    cy={node.y}
+                    r="20"
+                    className={`fill-current ${
+                      node.id === startNode
+                        ? 'text-green-500'
+                        : node.id === endNode
+                        ? 'text-red-500'
+                        : currentPath.includes(node.id)
+                        ? 'text-green-500'
+                        : visitedNodes.includes(node.id)
+                        ? 'text-blue-500'
+                        : currentNode.includes(node.id)
+                        ? 'text-yellow-500'
+                        : 'text-gray-600'
+                    }`}
+                  />
+                  <text
+                    x={node.x}
+                    y={node.y}
+                    className="text-sm fill-white"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                  >
+                    {node.id}
+                  </text>
+                </g>
+              ))}
+            </svg>
+          </div>
+        </div>
+        
+        <div className="w-96 space-y-6">
+          <div className="bg-gray-800 rounded-xl p-4">
+            <h3 className="text-xl font-semibold text-gray-200 mb-2">
+              {ALGORITHM_INFO[algorithm].name}
+            </h3>
+            <p className="text-gray-300 mb-4">
+              {ALGORITHM_INFO[algorithm].description}
+            </p>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <h4 className="text-sm font-medium text-gray-400">Time Complexity</h4>
+                <p className="text-gray-200">{ALGORITHM_INFO[algorithm].timeComplexity}</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-gray-400">Space Complexity</h4>
+                <p className="text-gray-200">{ALGORITHM_INFO[algorithm].spaceComplexity}</p>
+              </div>
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-gray-400 mb-2">Common Use Cases</h4>
+              <ul className="list-disc list-inside text-gray-300 space-y-1">
+                {ALGORITHM_INFO[algorithm].useCases.map((useCase, index) => (
+                  <li key={index}>{useCase}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          
+          <PseudocodeDisplay
+            code={graphPseudocode[algorithm as keyof typeof graphPseudocode]}
+            highlightedLine={highlightedLine}
+          />
+        </div>
       </div>
     </div>
   );

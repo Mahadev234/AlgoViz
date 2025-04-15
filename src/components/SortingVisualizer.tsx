@@ -6,83 +6,175 @@ import { sortingPseudocode } from '../algorithms/pseudocode';
 import { generateRandomArray } from '../algorithms/utils';
 import { PlayIcon, PauseIcon, StopIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 
-interface Algorithm {
-  name: string;
-  value: string;
-  timeComplexity: string;
-  spaceComplexity: string;
-  description: string;
+type SortingAlgorithm = 'bubble' | 'selection' | 'insertion' | 'merge' | 'quick' | 'heap' | 'shell' | 'counting' | 'radix';
+
+interface TimeComplexity {
+  best: string;
+  average: string;
+  worst: string;
 }
 
-const ALGORITHMS: Algorithm[] = [
-  {
+interface AlgorithmInfo {
+  name: string;
+  description: string;
+  timeComplexity: TimeComplexity;
+  spaceComplexity: string;
+  stability: string;
+  useCases: string[];
+}
+
+const ALGORITHMS: SortingAlgorithm[] = ['bubble', 'selection', 'insertion', 'merge', 'quick', 'heap', 'shell', 'counting', 'radix'];
+
+const SORTING_ALGORITHM_INFO: Record<SortingAlgorithm, AlgorithmInfo> = {
+  bubble: {
     name: 'Bubble Sort',
-    value: 'bubble',
-    timeComplexity: 'O(n²)',
+    description: 'Bubble Sort repeatedly steps through the list, compares adjacent elements and swaps them if they are in the wrong order. The pass through the list is repeated until the list is sorted.',
+    timeComplexity: {
+      best: 'O(n)',
+      average: 'O(n²)',
+      worst: 'O(n²)'
+    },
     spaceComplexity: 'O(1)',
-    description: 'Repeatedly steps through the list, compares adjacent elements and swaps them if they are in the wrong order.',
+    stability: 'Stable',
+    useCases: [
+      'Educational purposes',
+      'Small datasets',
+      'Nearly sorted data'
+    ]
   },
-  {
+  selection: {
     name: 'Selection Sort',
-    value: 'selection',
-    timeComplexity: 'O(n²)',
+    description: 'Selection Sort divides the input list into two parts: a sorted sublist and an unsorted sublist. It repeatedly finds the minimum element from the unsorted part and puts it at the beginning of the sorted part.',
+    timeComplexity: {
+      best: 'O(n²)',
+      average: 'O(n²)',
+      worst: 'O(n²)'
+    },
     spaceComplexity: 'O(1)',
-    description: 'Divides the input list into two parts: a sorted sublist and an unsorted sublist. The algorithm repeatedly finds the minimum element from the unsorted part and moves it to the sorted part.',
+    stability: 'Unstable',
+    useCases: [
+      'Small datasets',
+      'When memory writes are expensive',
+      'When auxiliary memory is limited'
+    ]
   },
-  {
+  insertion: {
     name: 'Insertion Sort',
-    value: 'insertion',
-    timeComplexity: 'O(n²)',
+    description: 'Insertion Sort builds the final sorted array one item at a time. It takes each element from the input and inserts it into its correct position in the sorted part of the array.',
+    timeComplexity: {
+      best: 'O(n)',
+      average: 'O(n²)',
+      worst: 'O(n²)'
+    },
     spaceComplexity: 'O(1)',
-    description: 'Builds the final sorted array one item at a time. It is much less efficient on large lists than more advanced algorithms.',
+    stability: 'Stable',
+    useCases: [
+      'Small datasets',
+      'Nearly sorted data',
+      'Online sorting (data coming in real-time)'
+    ]
   },
-  {
+  merge: {
     name: 'Merge Sort',
-    value: 'merge',
-    timeComplexity: 'O(n log n)',
+    description: 'Merge Sort is a divide-and-conquer algorithm that divides the input array into two halves, recursively sorts them, and then merges the two sorted halves.',
+    timeComplexity: {
+      best: 'O(n log n)',
+      average: 'O(n log n)',
+      worst: 'O(n log n)'
+    },
     spaceComplexity: 'O(n)',
-    description: 'Divides the unsorted list into n sublists, each containing one element, and then repeatedly merges sublists to produce new sorted sublists.',
+    stability: 'Stable',
+    useCases: [
+      'Large datasets',
+      'External sorting',
+      'When stability is required'
+    ]
   },
-  {
+  quick: {
     name: 'Quick Sort',
-    value: 'quick',
-    timeComplexity: 'O(n log n)',
+    description: 'Quick Sort is a divide-and-conquer algorithm that picks an element as pivot and partitions the array around the pivot. It recursively sorts the sub-arrays.',
+    timeComplexity: {
+      best: 'O(n log n)',
+      average: 'O(n log n)',
+      worst: 'O(n²)'
+    },
     spaceComplexity: 'O(log n)',
-    description: 'Picks an element as a pivot and partitions the given array around the picked pivot.',
+    stability: 'Unstable',
+    useCases: [
+      'Large datasets',
+      'When average-case performance matters',
+      'When memory is limited'
+    ]
   },
-  {
+  heap: {
     name: 'Heap Sort',
-    value: 'heap',
-    timeComplexity: 'O(n log n)',
+    description: 'Heap Sort uses a binary heap data structure to sort elements. It first builds a max heap from the input data, then repeatedly extracts the maximum element from the heap and places it at the end of the sorted array.',
+    timeComplexity: {
+      best: 'O(n log n)',
+      average: 'O(n log n)',
+      worst: 'O(n log n)'
+    },
     spaceComplexity: 'O(1)',
-    description: 'Uses a binary heap data structure to sort elements.',
+    stability: 'Unstable',
+    useCases: [
+      'Large datasets',
+      'When worst-case performance is important',
+      'When in-place sorting is required'
+    ]
   },
-  {
+  shell: {
     name: 'Shell Sort',
-    value: 'shell',
-    timeComplexity: 'O(n log² n)',
+    description: 'Shell Sort is an optimization of insertion sort that allows the exchange of items that are far apart. It starts by sorting pairs of elements far apart from each other, then progressively reducing the gap between elements to be compared.',
+    timeComplexity: {
+      best: 'O(n log n)',
+      average: 'O(n log² n)',
+      worst: 'O(n²)'
+    },
     spaceComplexity: 'O(1)',
-    description: 'An optimization of insertion sort that allows the exchange of items that are far apart.',
+    stability: 'Unstable',
+    useCases: [
+      'Medium-sized datasets',
+      'When insertion sort is too slow',
+      'When memory is limited'
+    ]
   },
-  {
+  counting: {
     name: 'Counting Sort',
-    value: 'counting',
-    timeComplexity: 'O(n + k)',
+    description: 'Counting Sort counts the number of objects having distinct key values, then does arithmetic to calculate the position of each object in the output sequence. It is efficient when the range of input data is not significantly greater than the number of objects to be sorted.',
+    timeComplexity: {
+      best: 'O(n + k)',
+      average: 'O(n + k)',
+      worst: 'O(n + k)'
+    },
     spaceComplexity: 'O(n + k)',
-    description: 'Counts the number of objects having distinct key values, then does arithmetic to calculate the position of each object in the output sequence.',
+    stability: 'Stable',
+    useCases: [
+      'When the range of input data is known and small',
+      'Sorting integers with a limited range',
+      'As a subroutine in radix sort'
+    ]
   },
-  {
+  radix: {
     name: 'Radix Sort',
-    value: 'radix',
-    timeComplexity: 'O(d * (n + k))',
+    description: 'Radix Sort sorts numbers by processing individual digits. It uses counting sort as a subroutine to sort the numbers based on each digit, starting from the least significant digit to the most significant digit.',
+    timeComplexity: {
+      best: 'O(d * (n + k))',
+      average: 'O(d * (n + k))',
+      worst: 'O(d * (n + k))'
+    },
     spaceComplexity: 'O(n + k)',
-    description: 'Sorts numbers by processing individual digits. It uses counting sort as a subroutine to sort the numbers based on each digit.',
-  },
-];
+    stability: 'Stable',
+    useCases: [
+      'Sorting large numbers',
+      'When the range of input data is large',
+      'When the number of digits is small compared to the number of items'
+    ]
+  }
+};
 
 const SortingVisualizer: React.FC = () => {
   const [arraySize, setArraySize] = useState<number>(20);
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('bubble');
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState<SortingAlgorithm>('bubble');
   const [array, setArray] = useState<number[]>([]);
   const [highlightedIndices, setHighlightedIndices] = useState<number[]>([]);
   const [isSorting, setIsSorting] = useState(false);
@@ -217,7 +309,7 @@ const SortingVisualizer: React.FC = () => {
     animationRef.current = requestAnimationFrame(animate);
   };
 
-  const getSortingGenerator = (algorithm: string) => {
+  const getSortingGenerator = (algorithm: SortingAlgorithm) => {
     if (!sortingAlgoRef.current) return { next: () => ({ done: true, value: { array: [], highlightedIndices: [], isComplete: false } }) };
 
     switch (algorithm) {
@@ -303,13 +395,13 @@ const SortingVisualizer: React.FC = () => {
           <div className="flex flex-wrap gap-4 items-center">
             <select
               value={selectedAlgorithm}
-              onChange={(e) => setSelectedAlgorithm(e.target.value)}
+              onChange={(e) => setSelectedAlgorithm(e.target.value as SortingAlgorithm)}
               className="px-4 py-2 rounded bg-gray-700 text-white"
               disabled={isSorting}
             >
               {ALGORITHMS.map((algo) => (
-                <option key={algo.value} value={algo.value}>
-                  {algo.name}
+                <option key={algo} value={algo}>
+                  {algo.charAt(0).toUpperCase() + algo.slice(1)}
                 </option>
               ))}
             </select>
@@ -426,9 +518,39 @@ const SortingVisualizer: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-          <AlgorithmInfo
-            algorithm={ALGORITHMS.find((a) => a.value === selectedAlgorithm)!}
-          />
+          <div className="bg-gray-800 rounded-xl p-4">
+            <h3 className="text-xl font-semibold text-gray-200 mb-2">
+              {SORTING_ALGORITHM_INFO[selectedAlgorithm].name}
+            </h3>
+            <p className="text-gray-300 mb-4">
+              {SORTING_ALGORITHM_INFO[selectedAlgorithm].description}
+            </p>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <h4 className="text-sm font-medium text-gray-400">Time Complexity</h4>
+                <div className="text-gray-200 space-y-1">
+                  <p>Best: {SORTING_ALGORITHM_INFO[selectedAlgorithm].timeComplexity.best}</p>
+                  <p>Average: {SORTING_ALGORITHM_INFO[selectedAlgorithm].timeComplexity.average}</p>
+                  <p>Worst: {SORTING_ALGORITHM_INFO[selectedAlgorithm].timeComplexity.worst}</p>
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-gray-400">Space Complexity</h4>
+                <p className="text-gray-200">{SORTING_ALGORITHM_INFO[selectedAlgorithm].spaceComplexity}</p>
+                <h4 className="text-sm font-medium text-gray-400 mt-2">Stability</h4>
+                <p className="text-gray-200">{SORTING_ALGORITHM_INFO[selectedAlgorithm].stability}</p>
+              </div>
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-gray-400 mb-2">Common Use Cases</h4>
+              <ul className="list-disc list-inside text-gray-300 space-y-1">
+                {SORTING_ALGORITHM_INFO[selectedAlgorithm].useCases.map((useCase: string, index: number) => (
+                  <li key={index}>{useCase}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          
           <PseudocodeDisplay
             code={sortingPseudocode[selectedAlgorithm as keyof typeof sortingPseudocode]}
             highlightedLine={highlightedLine}
