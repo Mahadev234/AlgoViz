@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import AlgorithmInfo from './AlgorithmInfo';
+import PseudocodeDisplay from './PseudocodeDisplay';
 import { SortingAlgorithms } from '../algorithms/sorting';
+import { sortingPseudocode } from '../algorithms/pseudocode';
 import { generateRandomArray } from '../algorithms/utils';
 import { PlayIcon, PauseIcon, StopIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 
@@ -89,6 +91,7 @@ const SortingVisualizer: React.FC = () => {
   const [customArrayInput, setCustomArrayInput] = useState<string>('');
   const [inputError, setInputError] = useState<string>('');
   const [isSorted, setIsSorted] = useState(false);
+  const [highlightedLine, setHighlightedLine] = useState<number | undefined>(undefined);
   const sortingAlgoRef = useRef<SortingAlgorithms | null>(null);
   const animationRef = useRef<number | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -154,25 +157,61 @@ const SortingVisualizer: React.FC = () => {
       }
 
       const result = generator.next();
-      if (!result.done) {
-        setArray(result.value.array);
-        setHighlightedIndices(result.value.highlightedIndices);
-        const delay = Math.max(1, 101 - speed);
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
-        timeoutRef.current = setTimeout(() => {
-          animationRef.current = requestAnimationFrame(animate);
-        }, delay);
-      } else {
+      if (result.done) {
         setIsSorting(false);
-        setIsPaused(false);
-        setHighlightedIndices([]);
         setIsSorted(true);
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
+        setHighlightedLine(undefined);
+        return;
       }
+
+      const { array: newArray, highlightedIndices: newHighlightedIndices } = result.value;
+      setArray(newArray);
+      setHighlightedIndices(newHighlightedIndices);
+
+      // Update highlighted line based on the current step
+      const currentAlgorithm = selectedAlgorithm;
+      const currentStep = result.value;
+      
+      // Map the current step to the corresponding pseudocode line
+      let lineToHighlight: number | undefined;
+      
+      switch (currentAlgorithm) {
+        case 'bubble':
+          if (currentStep.highlightedIndices.length === 2) {
+            lineToHighlight = 4; // Comparison line
+            if (newArray[currentStep.highlightedIndices[0]] > newArray[currentStep.highlightedIndices[1]]) {
+              lineToHighlight = 5; // Swap line
+            }
+          }
+          break;
+        case 'selection':
+          if (currentStep.highlightedIndices.length === 2) {
+            lineToHighlight = 5; // Comparison line
+            if (newArray[currentStep.highlightedIndices[1]] < newArray[currentStep.highlightedIndices[0]]) {
+              lineToHighlight = 6; // Update minIndex line
+            }
+          } else if (currentStep.highlightedIndices.length === 1) {
+            lineToHighlight = 8; // Swap line
+          }
+          break;
+        case 'insertion':
+          if (currentStep.highlightedIndices.length === 2) {
+            lineToHighlight = 6; // Comparison line
+            if (newArray[currentStep.highlightedIndices[0]] > newArray[currentStep.highlightedIndices[1]]) {
+              lineToHighlight = 7; // Shift line
+            }
+          } else if (currentStep.highlightedIndices.length === 1) {
+            lineToHighlight = 8; // Insert line
+          }
+          break;
+        // Add cases for other algorithms as needed
+      }
+      
+      setHighlightedLine(lineToHighlight);
+
+      timeoutRef.current = setTimeout(() => {
+        animationRef.current = requestAnimationFrame(animate);
+      }, 1000 / speed);
     };
 
     animationRef.current = requestAnimationFrame(animate);
@@ -258,147 +297,144 @@ const SortingVisualizer: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="flex flex-col space-y-2">
-          <label className="block text-sm font-medium text-gray-300">
-            Array Size
-          </label>
-          <input
-            type="number"
-            min="5"
-            max="50"
-            value={arraySize}
-            onChange={(e) => setArraySize(Number(e.target.value))}
-            disabled={isSorting}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-200"
-          />
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-6">
+          <div className="flex flex-wrap gap-4 items-center">
+            <select
+              value={selectedAlgorithm}
+              onChange={(e) => setSelectedAlgorithm(e.target.value)}
+              className="px-4 py-2 rounded bg-gray-700 text-white"
+              disabled={isSorting}
+            >
+              {ALGORITHMS.map((algo) => (
+                <option key={algo.value} value={algo.value}>
+                  {algo.name}
+                </option>
+              ))}
+            </select>
+            
+            <div className="flex items-center gap-2">
+              <label className="text-white">Size:</label>
+              <input
+                type="range"
+                min="5"
+                max="50"
+                value={arraySize}
+                onChange={(e) => setArraySize(parseInt(e.target.value))}
+                className="w-32"
+                disabled={isSorting}
+              />
+              <span className="text-white">{arraySize}</span>
+            </div>
 
-        <div className="flex flex-col space-y-2">
-          <label className="block text-sm font-medium text-gray-300">
-            Algorithm
-          </label>
-          <select
-            value={selectedAlgorithm}
-            onChange={(e) => setSelectedAlgorithm(e.target.value)}
-            disabled={isSorting}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-200"
-          >
-            {ALGORITHMS.map((algo) => (
-              <option key={algo.value} value={algo.value}>
-                {algo.name}
-              </option>
-            ))}
-          </select>
-        </div>
+            <div className="flex items-center gap-2">
+              <label className="text-white">Speed:</label>
+              <input
+                type="range"
+                min="1"
+                max="100"
+                value={speed}
+                onChange={(e) => setSpeed(parseInt(e.target.value))}
+                className="w-32"
+                disabled={isSorting}
+              />
+            </div>
+          </div>
 
-        <div className="flex flex-col space-y-2">
-          <label className="block text-sm font-medium text-gray-300">
-            Speed
-          </label>
-          <input
-            type="range"
-            min="1"
-            max="100"
-            value={speed}
-            onChange={(e) => setSpeed(Number(e.target.value))}
-            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500"
-          />
-        </div>
+          <div className="flex gap-4">
+            <button
+              onClick={handleSort}
+              disabled={isSorting}
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+            >
+              <PlayIcon className="w-5 h-5 inline-block mr-2" />
+              Sort
+            </button>
+            <button
+              onClick={handlePause}
+              disabled={!isSorting || isPaused}
+              className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 disabled:opacity-50"
+            >
+              <PauseIcon className="w-5 h-5 inline-block mr-2" />
+              Pause
+            </button>
+            <button
+              onClick={handleResume}
+              disabled={!isSorting || !isPaused}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            >
+              <PlayIcon className="w-5 h-5 inline-block mr-2" />
+              Resume
+            </button>
+            <button
+              onClick={handleStop}
+              disabled={!isSorting}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+            >
+              <StopIcon className="w-5 h-5 inline-block mr-2" />
+              Stop
+            </button>
+            <button
+              onClick={handleGenerateRandom}
+              disabled={isSorting}
+              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:opacity-50"
+            >
+              <ArrowPathIcon className="w-5 h-5 inline-block mr-2" />
+              New Array
+            </button>
+          </div>
 
-        <div className="flex flex-col space-y-2">
-          <label className="block text-sm font-medium text-gray-300">
-            Custom Array
-          </label>
-          <div className="flex space-x-2">
+          <div className="flex gap-4 items-center">
             <input
               type="text"
               value={customArrayInput}
               onChange={(e) => setCustomArrayInput(e.target.value)}
-              placeholder="e.g., 5,3,8,1,2"
-              className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-200"
+              placeholder="Enter comma-separated numbers"
+              className="px-4 py-2 rounded bg-gray-700 text-white flex-grow"
+              disabled={isSorting}
             />
             <button
               onClick={handleCustomArray}
               disabled={isSorting}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50"
             >
-              Apply
+              Use Custom Array
             </button>
           </div>
-          {inputError && (
-            <p className="text-red-400 text-sm">{inputError}</p>
-          )}
+          {inputError && <p className="text-red-500">{inputError}</p>}
+
+          <div className="h-64 flex items-end justify-center gap-1 bg-gray-800 rounded-lg p-4">
+            {array.map((value, index) => (
+              <div
+                key={index}
+                className={`w-8 bg-blue-500 transition-all duration-100 relative ${
+                  highlightedIndices.includes(index)
+                    ? 'bg-red-500'
+                    : isSorted
+                    ? 'bg-green-500'
+                    : ''
+                }`}
+                style={{ height: `${(value / Math.max(...array)) * 100}%` }}
+              >
+                <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-300 whitespace-nowrap">
+                  {value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <AlgorithmInfo
+            algorithm={ALGORITHMS.find((a) => a.value === selectedAlgorithm)!}
+          />
+          <PseudocodeDisplay
+            code={sortingPseudocode[selectedAlgorithm as keyof typeof sortingPseudocode]}
+            highlightedLine={highlightedLine}
+          />
         </div>
       </div>
-
-      <div className="flex justify-center space-x-4">
-        <button
-          onClick={handleGenerateRandom}
-          disabled={isSorting}
-          className="px-4 py-2 bg-gray-700 text-gray-200 rounded-lg hover:bg-gray-600 transition-colors duration-200 disabled:opacity-50"
-        >
-          <ArrowPathIcon className="h-5 w-5 inline-block mr-2" />
-          Generate Random
-        </button>
-        <button
-          onClick={handleSort}
-          disabled={isSorting}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 disabled:opacity-50"
-        >
-          <PlayIcon className="h-5 w-5 inline-block mr-2" />
-          Start
-        </button>
-        {isSorting && (
-          <>
-            <button
-              onClick={isPaused ? handleResume : handlePause}
-              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200"
-            >
-              {isPaused ? (
-                <PlayIcon className="h-5 w-5 inline-block mr-2" />
-              ) : (
-                <PauseIcon className="h-5 w-5 inline-block mr-2" />
-              )}
-              {isPaused ? 'Resume' : 'Pause'}
-            </button>
-            <button
-              onClick={handleStop}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
-            >
-              <StopIcon className="h-5 w-5 inline-block mr-2" />
-              Stop
-            </button>
-          </>
-        )}
-      </div>
-
-      <div className="h-64 flex items-end justify-center space-x-1">
-        {array.map((value, index) => (
-          <div
-            key={index}
-            className={`w-8 transition-all duration-300 relative ${
-              highlightedIndices.includes(index)
-                ? 'bg-blue-500'
-                : isSorted
-                ? 'bg-green-500'
-                : 'bg-gray-600'
-            }`}
-            style={{
-              height: `${(value / Math.max(...array)) * 100}%`,
-            }}
-          >
-            <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-300">
-              {value}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      <AlgorithmInfo
-        algorithm={ALGORITHMS.find((algo) => algo.value === selectedAlgorithm)!}
-      />
     </div>
   );
 };
